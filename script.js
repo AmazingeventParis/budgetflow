@@ -288,9 +288,15 @@ const btnClearFilters = document.getElementById('btn-clear-filters');
 // ===== Category Icons =====
 const categoryIcons = {
     'Salaire': '\u{1F4B0}', 'Freelance': '\u{1F4BB}', 'Investissements': '\u{1F4C8}',
-    'Autre revenu': '\u{1F4B5}', 'Grosses courses': '\u{1F6D2}', 'Courses quotidiennes': '\u{1F956}', 'Transport': '\u{1F697}',
-    'Logement': '\u{1F3E0}', 'Loisirs': '\u{1F3AE}', 'Sante': '\u{1F3E5}',
-    'Shopping': '\u{1F6CD}\u{FE0F}', 'Factures': '\u{1F4C4}', 'Autre depense': '\u{1F4E6}',
+    'Autre revenu': '\u{1F4B5}',
+    'Grosses courses': '\u{1F6D2}', 'Courses quotidiennes': '\u{1F956}',
+    'Essence': '\u26FD', 'Transport en commun': '\u{1F68C}', 'Entretien vehicule': '\u{1F527}',
+    'Loyer': '\u{1F3E0}', 'Charges': '\u{1F4A1}', 'Internet / Telephone': '\u{1F4F1}',
+    'Sorties': '\u{1F37B}', 'Abonnements': '\u{1F4FA}', 'Sport': '\u{1F3CB}\u{FE0F}',
+    'Medecin': '\u{1F3E5}', 'Pharmacie': '\u{1F48A}',
+    'Vetements': '\u{1F455}', 'Electronique': '\u{1F4BB}', 'Cadeaux': '\u{1F381}',
+    'Assurances': '\u{1F4CB}', 'Impots': '\u{1F3DB}\u{FE0F}',
+    'Autre depense': '\u{1F4E6}',
 };
 
 const chartColors = [
@@ -354,12 +360,22 @@ function computeTotalsFrom(txs) {
 const categoryAdvice = {
     'Grosses courses': { tip: 'Planifiez vos repas a l\'avance, faites une liste et comparez les prix entre enseignes.', target: 0.20 },
     'Courses quotidiennes': { tip: 'Limitez les achats impulsifs du quotidien en fixant un budget journalier.', target: 0.10 },
-    'Transport': { tip: 'Pensez au covoiturage, aux transports en commun ou au velo pour reduire vos frais.', target: 0.10 },
-    'Logement': { tip: 'Verifiez vos contrats d\'energie et d\'assurance pour trouver des offres plus avantageuses.', target: 0.35 },
-    'Loisirs': { tip: 'Fixez-vous un budget loisirs hebdomadaire et privilegiez les activites gratuites.', target: 0.10 },
-    'Sante': { tip: 'Comparez les mutuelles et verifiez vos remboursements pour optimiser vos depenses.', target: 0.05 },
-    'Shopping': { tip: 'Appliquez la regle des 48h : attendez 2 jours avant tout achat non essentiel.', target: 0.05 },
-    'Factures': { tip: 'Renegociez vos abonnements et resiliez ceux que vous n\'utilisez plus.', target: 0.10 },
+    'Essence': { tip: 'Comparez les prix des stations, adoptez l\'eco-conduite et pensez au covoiturage.', target: 0.05 },
+    'Transport en commun': { tip: 'Verifiez si un abonnement mensuel ou annuel serait plus avantageux.', target: 0.03 },
+    'Entretien vehicule': { tip: 'Planifiez l\'entretien regulier pour eviter les reparations couteuses.', target: 0.02 },
+    'Loyer': { tip: 'Comparez votre loyer au marche local. Pensez a la colocation ou au logement social.', target: 0.25 },
+    'Charges': { tip: 'Reduisez votre consommation d\'eau et d\'energie avec des gestes simples au quotidien.', target: 0.05 },
+    'Internet / Telephone': { tip: 'Comparez les offres operateurs et renegociez votre forfait chaque annee.', target: 0.05 },
+    'Sorties': { tip: 'Privilegiez les happy hours, evenements gratuits et sorties en plein air.', target: 0.04 },
+    'Abonnements': { tip: 'Faites le tri : resiliez les abonnements que vous n\'utilisez pas assez.', target: 0.03 },
+    'Sport': { tip: 'Comparez salle de sport, sport en exterieur gratuit et cours en ligne.', target: 0.03 },
+    'Medecin': { tip: 'Privilegiez les medecins conventionnes secteur 1 et verifiez vos remboursements.', target: 0.03 },
+    'Pharmacie': { tip: 'Demandez les generiques et comparez les prix entre pharmacies.', target: 0.02 },
+    'Vetements': { tip: 'Achetez en soldes, privilegiez la qualite a la quantite et explorez la seconde main.', target: 0.02 },
+    'Electronique': { tip: 'Attendez les periodes de promo (Black Friday, soldes) et comparez les reconditionnes.', target: 0.02 },
+    'Cadeaux': { tip: 'Anticipez les occasions et fixez un budget par personne. Pensez au fait-main.', target: 0.01 },
+    'Assurances': { tip: 'Comparez les offres chaque annee et regroupez vos contrats pour negocier.', target: 0.03 },
+    'Impots': { tip: 'Verifiez vos credits d\'impot et deductions auxquels vous avez droit.', target: 0.02 },
     'Autre depense': { tip: 'Identifiez ces depenses et categorisez-les pour mieux les controler.', target: 0.05 },
 };
 
