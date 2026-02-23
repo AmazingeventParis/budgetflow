@@ -364,7 +364,7 @@ const categoryAdvice = {
 
 function generateAdviceData(txs, income, expense, balance) {
     const expenses = txs.filter((t) => t.type === 'expense');
-    if (expenses.length === 0 || balance > BALANCE_THRESHOLD) return null;
+    if (expenses.length === 0) return null;
     const grouped = {};
     expenses.forEach((t) => { grouped[t.category] = (grouped[t.category] || 0) + (t.amountEUR || t.amount); });
     return Object.entries(grouped).sort((a, b) => b[1] - a[1]).map(([category, amount]) => {
@@ -924,24 +924,37 @@ function renderComparisonChart() {
 // ===== Render Advice =====
 function renderAdvice() {
     const { income, expense, balance } = computeTotals();
-    if (balance > BALANCE_THRESHOLD || transactions.length === 0) { adviceSection.classList.add('hidden'); return; }
     const expenses = transactions.filter((t) => t.type === 'expense');
-    if (expenses.length === 0) { adviceSection.classList.add('hidden'); return; }
+    if (expenses.length === 0 || transactions.length === 0) { adviceSection.classList.add('hidden'); return; }
     adviceSection.classList.remove('hidden');
 
     const grouped = {};
     expenses.forEach((t) => { grouped[t.category] = (grouped[t.category] || 0) + (t.amountEUR || t.amount); });
     const sorted = Object.entries(grouped).sort((a, b) => b[1] - a[1]);
-    const deficit = BALANCE_THRESHOLD - balance;
 
-    let html = `<div class="advice-summary"><div class="advice-summary-label">Montant a economiser pour repasser au-dessus du seuil</div><div class="advice-summary-amount">${formatCurrency(deficit)}</div></div>`;
+    const belowThreshold = balance <= BALANCE_THRESHOLD;
+    const savingsRate = income > 0 ? ((income - expense) / income * 100) : 0;
+    const warningCount = sorted.filter(([cat, amt]) => {
+        const adv = categoryAdvice[cat];
+        return adv && (amt / expense * 100) > (adv.target * 100);
+    }).length;
+
+    let html = '';
+    if (belowThreshold) {
+        const deficit = BALANCE_THRESHOLD - balance;
+        html += `<div class="advice-summary advice-summary-warning"><div class="advice-summary-icon">\u26A0</div><div><div class="advice-summary-label">Solde en dessous du seuil de ${formatCurrency(BALANCE_THRESHOLD)}</div><div class="advice-summary-amount">${formatCurrency(deficit)} a economiser</div></div></div>`;
+    } else if (warningCount > 0) {
+        html += `<div class="advice-summary advice-summary-mixed"><div class="advice-summary-icon">\u{1F4CA}</div><div><div class="advice-summary-label">${warningCount} poste${warningCount > 1 ? 's' : ''} au-dessus du budget ideal</div><div class="advice-summary-detail">Solde : ${formatCurrency(balance)} | Taux d'epargne : ${savingsRate.toFixed(0)}%</div></div></div>`;
+    } else {
+        html += `<div class="advice-summary advice-summary-good"><div class="advice-summary-icon">\u2705</div><div><div class="advice-summary-label">Toutes vos depenses sont bien maitrisees !</div><div class="advice-summary-detail">Solde : ${formatCurrency(balance)} | Taux d'epargne : ${savingsRate.toFixed(0)}%</div></div></div>`;
+    }
 
     sorted.forEach(([category, amount]) => {
         const pct = ((amount / expense) * 100).toFixed(1);
         const icon = categoryIcons[category] || '\u{1F4CC}';
         const adv = categoryAdvice[category];
         const idealPct = adv ? (adv.target * 100) : null;
-        const tip = adv ? adv.tip : 'Surveillez cette categorie.';
+        const tip = adv ? adv.tip : 'Surveillez cette categorie et fixez-vous un plafond mensuel.';
         const isWarning = idealPct !== null && parseFloat(pct) > idealPct;
         let analysis = '';
         if (isWarning) {
