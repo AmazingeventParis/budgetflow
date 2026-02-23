@@ -53,6 +53,15 @@
     color: #fff;
 }
 
+[data-theme="light"] select optgroup {
+    color: #c2185b;
+}
+
+[data-theme="light"] select option {
+    color: var(--text);
+    background: #fff;
+}
+
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg);
@@ -670,6 +679,19 @@ input:focus,
 select:focus {
     outline: none;
     border-color: var(--accent);
+}
+
+select optgroup {
+    color: #e91e8a;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 0.95rem;
+}
+
+select option {
+    color: var(--text);
+    font-weight: 400;
+    background: var(--bg);
 }
 
 input::placeholder {
