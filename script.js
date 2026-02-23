@@ -303,10 +303,47 @@ const categoryIcons = {
     'Factures': '\u{1F4C4}',
 };
 
-const chartColors = [
+const categoryColors = {
+    'Grosses courses': '#f97316',
+    'Courses quotidiennes': '#fb923c',
+    'Essence': '#3b82f6',
+    'Transport en commun': '#06b6d4',
+    'Entretien vehicule': '#0ea5e9',
+    'Loyer': '#8b5cf6',
+    'Charges': '#a78bfa',
+    'Internet / Telephone': '#c084fc',
+    'Sorties': '#ec4899',
+    'Abonnements': '#f472b6',
+    'Sport': '#e879f9',
+    'Medecin': '#14b8a6',
+    'Pharmacie': '#2dd4bf',
+    'Vetements': '#f43f5e',
+    'Electronique': '#e11d48',
+    'Cadeaux': '#be123c',
+    'Assurances': '#eab308',
+    'Impots': '#ca8a04',
+    'Autre depense': '#78716c',
+    // Retrocompat anciennes categories
+    'Alimentation': '#f97316',
+    'Transport': '#3b82f6',
+    'Logement': '#8b5cf6',
+    'Loisirs': '#ec4899',
+    'Sante': '#14b8a6',
+    'Shopping': '#f43f5e',
+    'Factures': '#eab308',
+};
+
+const chartColorsFallback = [
     '#818cf8', '#f87171', '#34d399', '#fbbf24',
     '#f472b6', '#60a5fa', '#a78bfa', '#fb923c',
+    '#e879f9', '#14b8a6', '#f97316', '#06b6d4',
+    '#e11d48', '#84cc16', '#8b5cf6', '#0ea5e9',
+    '#eab308', '#78716c', '#2dd4bf', '#c084fc',
 ];
+
+function getCategoryColor(name, index) {
+    return categoryColors[name] || chartColorsFallback[index % chartColorsFallback.length];
+}
 
 // ===== Toast =====
 let toastTimeout = null;
@@ -777,7 +814,7 @@ function renderChart() {
 
     const { balance } = computeTotals();
     const overspent = balance <= BALANCE_THRESHOLD && transactions.length > 0 ? findOverspentCategories() : new Set();
-    const colors = labels.map((l, i) => overspent.has(l) ? '#dc2626' : chartColors[i % chartColors.length]);
+    const colors = labels.map((l, i) => overspent.has(l) ? '#dc2626' : getCategoryColor(l, i));
 
     if (expenseChart) {
         expenseChart.data.labels = labels;
