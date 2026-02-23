@@ -181,6 +181,10 @@ body {
     color: var(--accent);
 }
 
+.btn-toggle-password .eye-icon {
+    display: block;
+}
+
 .auth-error {
     color: var(--expense);
     font-size: 0.85rem;
