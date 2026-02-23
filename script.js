@@ -297,6 +297,10 @@ const categoryIcons = {
     'Vetements': '\u{1F455}', 'Electronique': '\u{1F4BB}', 'Cadeaux': '\u{1F381}',
     'Assurances': '\u{1F4CB}', 'Impots': '\u{1F3DB}\u{FE0F}',
     'Autre depense': '\u{1F4E6}',
+    // Retrocompat anciennes categories
+    'Alimentation': '\u{1F6D2}', 'Transport': '\u{1F697}', 'Logement': '\u{1F3E0}',
+    'Loisirs': '\u{1F3AE}', 'Sante': '\u{1F3E5}', 'Shopping': '\u{1F6CD}\u{FE0F}',
+    'Factures': '\u{1F4C4}',
 };
 
 const chartColors = [
@@ -377,6 +381,14 @@ const categoryAdvice = {
     'Assurances': { tip: 'Comparez les offres chaque annee et regroupez vos contrats pour negocier.', target: 0.03 },
     'Impots': { tip: 'Verifiez vos credits d\'impot et deductions auxquels vous avez droit.', target: 0.02 },
     'Autre depense': { tip: 'Identifiez ces depenses et categorisez-les pour mieux les controler.', target: 0.05 },
+    // Retrocompat anciennes categories
+    'Alimentation': { tip: 'Planifiez vos repas et faites une liste de courses pour eviter les achats impulsifs.', target: 0.30 },
+    'Transport': { tip: 'Pensez au covoiturage, aux transports en commun ou au velo.', target: 0.10 },
+    'Logement': { tip: 'Verifiez vos contrats d\'energie et d\'assurance pour trouver des offres plus avantageuses.', target: 0.35 },
+    'Loisirs': { tip: 'Fixez-vous un budget loisirs hebdomadaire et privilegiez les activites gratuites.', target: 0.10 },
+    'Sante': { tip: 'Comparez les mutuelles et verifiez vos remboursements.', target: 0.05 },
+    'Shopping': { tip: 'Appliquez la regle des 48h : attendez 2 jours avant tout achat non essentiel.', target: 0.05 },
+    'Factures': { tip: 'Renegociez vos abonnements et resiliez ceux que vous n\'utilisez plus.', target: 0.10 },
 };
 
 function generateAdviceData(txs, income, expense, balance) {
