@@ -288,7 +288,7 @@ const btnClearFilters = document.getElementById('btn-clear-filters');
 // ===== Category Icons =====
 const categoryIcons = {
     'Salaire': '\u{1F4B0}', 'Freelance': '\u{1F4BB}', 'Investissements': '\u{1F4C8}',
-    'Autre revenu': '\u{1F4B5}', 'Alimentation': '\u{1F6D2}', 'Transport': '\u{1F697}',
+    'Autre revenu': '\u{1F4B5}', 'Grosses courses': '\u{1F6D2}', 'Courses quotidiennes': '\u{1F956}', 'Transport': '\u{1F697}',
     'Logement': '\u{1F3E0}', 'Loisirs': '\u{1F3AE}', 'Sante': '\u{1F3E5}',
     'Shopping': '\u{1F6CD}\u{FE0F}', 'Factures': '\u{1F4C4}', 'Autre depense': '\u{1F4E6}',
 };
@@ -352,7 +352,8 @@ function computeTotalsFrom(txs) {
 }
 
 const categoryAdvice = {
-    'Alimentation': { tip: 'Planifiez vos repas a l\'avance et faites une liste de courses pour eviter les achats impulsifs.', target: 0.30 },
+    'Grosses courses': { tip: 'Planifiez vos repas a l\'avance, faites une liste et comparez les prix entre enseignes.', target: 0.20 },
+    'Courses quotidiennes': { tip: 'Limitez les achats impulsifs du quotidien en fixant un budget journalier.', target: 0.10 },
     'Transport': { tip: 'Pensez au covoiturage, aux transports en commun ou au velo pour reduire vos frais.', target: 0.10 },
     'Logement': { tip: 'Verifiez vos contrats d\'energie et d\'assurance pour trouver des offres plus avantageuses.', target: 0.35 },
     'Loisirs': { tip: 'Fixez-vous un budget loisirs hebdomadaire et privilegiez les activites gratuites.', target: 0.10 },
