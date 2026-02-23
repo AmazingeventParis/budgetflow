@@ -489,6 +489,7 @@ function applyRecurringTransactions() {
 function initApp() {
     checkMonthlyReset();
     applyRecurringTransactions();
+    injectCustomCategories();
     renderTodayDate();
     dateInput.value = new Date().toISOString().split('T')[0];
     renderRecurringList();
@@ -1279,6 +1280,151 @@ document.getElementById('btn-close-currency').addEventListener('click', () => {
     document.getElementById('currency-overlay').classList.add('hidden');
 });
 
+// ===== Custom Categories =====
+const ICON_CHOICES = [
+    '\u{1F3E0}', '\u{1F697}', '\u{1F4B0}', '\u{1F37D}\u{FE0F}', '\u{1F3AE}', '\u{1F4DA}',
+    '\u{1F436}', '\u{1F431}', '\u{1F33F}', '\u{2708}\u{FE0F}', '\u{1F3B5}', '\u{1F4F7}',
+    '\u{1F48E}', '\u{1F527}', '\u{1F393}', '\u{1F476}', '\u{1F3CB}\u{FE0F}', '\u{2615}',
+    '\u{1F4B3}', '\u{1F384}', '\u{1F48A}', '\u{1F4E6}', '\u{1F6CD}\u{FE0F}', '\u{1F4CC}'
+];
+
+let selectedCustomIcon = ICON_CHOICES[0];
+
+function getCustomCategories() {
+    return currentSettings.customCategories || [];
+}
+
+function saveCustomCategories(cats) {
+    currentSettings.customCategories = cats;
+    saveSettings(currentSettings);
+}
+
+function injectCustomCategories() {
+    const cats = getCustomCategories();
+    if (cats.length === 0) return;
+
+    const selects = [
+        document.getElementById('category'),
+        document.getElementById('rec-category'),
+        document.getElementById('filter-category')
+    ];
+
+    const incomeCats = cats.filter(c => c.type === 'income');
+    const expenseCats = cats.filter(c => c.type === 'expense');
+
+    selects.forEach(sel => {
+        if (!sel) return;
+        // Remove previously injected custom optgroups
+        sel.querySelectorAll('.custom-optgroup').forEach(g => g.remove());
+
+        if (incomeCats.length > 0) {
+            const group = document.createElement('optgroup');
+            group.label = 'Mes revenus';
+            group.className = 'custom-optgroup';
+            incomeCats.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.name;
+                opt.textContent = c.icon + ' ' + c.name;
+                group.appendChild(opt);
+            });
+            // Insert after the Revenus optgroup or at beginning
+            const firstExpenseGroup = sel.querySelector('optgroup[label="Alimentation"], optgroup[label="Transport"]');
+            if (firstExpenseGroup) {
+                sel.insertBefore(group, firstExpenseGroup);
+            } else {
+                sel.appendChild(group);
+            }
+        }
+
+        if (expenseCats.length > 0) {
+            const group = document.createElement('optgroup');
+            group.label = 'Mes depenses';
+            group.className = 'custom-optgroup';
+            expenseCats.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.name;
+                opt.textContent = c.icon + ' ' + c.name;
+                group.appendChild(opt);
+            });
+            sel.appendChild(group);
+        }
+    });
+
+    // Also register icons for custom categories
+    cats.forEach(c => {
+        categoryIcons[c.name] = c.icon;
+    });
+}
+
+function renderIconPicker() {
+    const picker = document.getElementById('icon-picker');
+    picker.innerHTML = ICON_CHOICES.map(icon =>
+        `<button type="button" class="icon-picker-btn ${icon === selectedCustomIcon ? 'selected' : ''}" data-icon="${icon}">${icon}</button>`
+    ).join('');
+}
+
+function renderCustomCategoryList() {
+    const cats = getCustomCategories();
+    const container = document.getElementById('custom-category-list');
+    if (cats.length === 0) { container.innerHTML = ''; return; }
+    container.innerHTML = `<div class="custom-category-list-title">Vos categories</div>` +
+        cats.map((c, i) => `<div class="custom-cat-item"><div class="custom-cat-info"><span class="cat-icon">${c.icon}</span><span>${escapeHtml(c.name)}</span><span class="cat-type">${c.type === 'income' ? 'Revenu' : 'Depense'}</span></div><button class="btn-delete-custom-cat" data-idx="${i}" title="Supprimer">\u2715</button></div>`).join('');
+}
+
+function openCustomCategoryOverlay() {
+    document.getElementById('custom-cat-name').value = '';
+    document.getElementById('custom-cat-type').value = 'expense';
+    selectedCustomIcon = ICON_CHOICES[0];
+    renderIconPicker();
+    renderCustomCategoryList();
+    document.getElementById('custom-category-overlay').classList.remove('hidden');
+    document.getElementById('custom-cat-name').focus();
+}
+
+document.getElementById('btn-add-category').addEventListener('click', openCustomCategoryOverlay);
+
+document.getElementById('icon-picker').addEventListener('click', (e) => {
+    const btn = e.target.closest('.icon-picker-btn');
+    if (!btn) return;
+    selectedCustomIcon = btn.dataset.icon;
+    document.querySelectorAll('.icon-picker-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+});
+
+document.getElementById('btn-save-custom-cat').addEventListener('click', () => {
+    const name = document.getElementById('custom-cat-name').value.trim();
+    const type = document.getElementById('custom-cat-type').value;
+    if (!name) { showToast('Entrez un nom de categorie', true); return; }
+    const cats = getCustomCategories();
+    const allNames = [...Object.keys(categoryIcons), ...cats.map(c => c.name)];
+    if (allNames.some(n => n.toLowerCase() === name.toLowerCase())) {
+        showToast('Cette categorie existe deja', true);
+        return;
+    }
+    cats.push({ name, type, icon: selectedCustomIcon });
+    saveCustomCategories(cats);
+    injectCustomCategories();
+    renderCustomCategoryList();
+    document.getElementById('custom-cat-name').value = '';
+    showToast('Categorie "' + name + '" creee');
+});
+
+document.getElementById('btn-cancel-custom-cat').addEventListener('click', () => {
+    document.getElementById('custom-category-overlay').classList.add('hidden');
+});
+
+document.getElementById('custom-category-list').addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-delete-custom-cat');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.idx);
+    const cats = getCustomCategories();
+    const removed = cats.splice(idx, 1)[0];
+    saveCustomCategories(cats);
+    injectCustomCategories();
+    renderCustomCategoryList();
+    showToast('Categorie "' + removed.name + '" supprimee');
+});
+
 // ===== Archives UI =====
 btnToggleArchives.addEventListener('click', () => {
     const isHidden = archivesBody.classList.toggle('hidden');
@@ -1403,6 +1549,7 @@ function openCurrencyOverlay() {
 function closeOverlays() {
     document.getElementById('shortcuts-overlay').classList.add('hidden');
     document.getElementById('currency-overlay').classList.add('hidden');
+    document.getElementById('custom-category-overlay').classList.add('hidden');
     if (document.activeElement) document.activeElement.blur();
 }
 

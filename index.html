@@ -174,7 +174,7 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="category">Categorie</label>
+                            <label for="category">Categorie <button type="button" class="btn-add-category" id="btn-add-category" title="Creer une categorie">+</button></label>
                             <select id="category" required>
                                 <option value="">-- Choisir --</option>
                                 <optgroup label="Revenus">
@@ -476,6 +476,35 @@
                 <button class="btn-add" id="btn-save-rates">Enregistrer</button>
                 <button class="btn-undo" id="btn-close-currency">Fermer</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Custom Category Overlay -->
+    <div class="custom-category-overlay hidden" id="custom-category-overlay">
+        <div class="custom-category-card">
+            <h2>Nouvelle categorie</h2>
+            <div class="custom-category-form">
+                <div class="form-group">
+                    <label for="custom-cat-name">Nom</label>
+                    <input type="text" id="custom-cat-name" placeholder="Ex: Animaux" maxlength="30" required>
+                </div>
+                <div class="form-group">
+                    <label for="custom-cat-type">Type</label>
+                    <select id="custom-cat-type">
+                        <option value="expense">Depense</option>
+                        <option value="income">Revenu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="custom-cat-icon">Icone</label>
+                    <div class="icon-picker" id="icon-picker"></div>
+                </div>
+            </div>
+            <div class="custom-category-actions">
+                <button class="btn-add" id="btn-save-custom-cat">Creer</button>
+                <button class="btn-undo" id="btn-cancel-custom-cat">Annuler</button>
+            </div>
+            <div class="custom-category-list" id="custom-category-list"></div>
         </div>
     </div>
 
