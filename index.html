@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Organisateur de Budget</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#818cf8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- ===== Auth Screen ===== -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-card">
+            <h1 class="auth-logo">BudgetFlow</h1>
+            <p class="auth-subtitle">Connectez-vous ou creez un compte</p>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login">Connexion</button>
+                <button class="auth-tab" id="tab-register">Inscription</button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="login-form">
+                <div class="auth-field">
+                    <label for="login-username">Nom d'utilisateur</label>
+                    <input type="text" id="login-username" placeholder="Votre identifiant" required autocomplete="username">
+                </div>
+                <div class="auth-field">
+                    <label for="login-password">Mot de passe</label>
+                    <input type="password" id="login-password" placeholder="Votre mot de passe" required autocomplete="current-password">
+                </div>
+                <p class="auth-error hidden" id="login-error"></p>
+                <button type="submit" class="auth-btn">Se connecter</button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form hidden" id="register-form">
+                <div class="auth-field">
+                    <label for="reg-username">Nom d'utilisateur</label>
+                    <input type="text" id="reg-username" placeholder="Choisissez un identifiant" required minlength="3" maxlength="20" autocomplete="username">
+                </div>
+                <div class="auth-field">
+                    <label for="reg-password">Mot de passe</label>
+                    <input type="password" id="reg-password" placeholder="Minimum 4 caracteres" required minlength="4" autocomplete="new-password">
+                </div>
+                <div class="auth-field">
+                    <label for="reg-password2">Confirmer le mot de passe</label>
+                    <input type="password" id="reg-password2" placeholder="Retapez le mot de passe" required autocomplete="new-password">
+                </div>
+                <p class="auth-error hidden" id="register-error"></p>
+                <button type="submit" class="auth-btn">Creer mon compte</button>
+            </form>
+
+            <button class="btn-theme-auth" id="btn-theme-auth" title="Changer de theme">&#9790;</button>
+        </div>
+    </div>
+
+    <!-- ===== App ===== -->
+    <div class="app hidden" id="app">
+        <header>
+            <div class="header-top">
+                <div class="header-user">
+                    <span class="user-avatar" id="user-avatar"></span>
+                    <span class="user-name" id="user-name"></span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-theme" id="btn-theme" title="Changer de theme" aria-label="Changer de theme">
+                        <span id="theme-icon">&#9790;</span>
+                    </button>
+                    <button class="btn-logout" id="btn-logout">Deconnexion</button>
+                </div>
+            </div>
+            <h1>BudgetFlow</h1>
+            <p class="subtitle">Votre budget, simplifie</p>
+            <div class="today-date" id="today-date"></div>
+        </header>
+
+        <main>
+            <!-- Summary Cards -->
+            <section class="summary">
+                <div class="card card-income">
+                    <span class="card-label">Revenus</span>
+                    <span class="card-amount" id="total-income">0,00 &euro;</span>
+                </div>
+                <div class="card card-expense">
+                    <span class="card-label">Depenses</span>
+                    <span class="card-amount" id="total-expense">0,00 &euro;</span>
+                </div>
+                <div class="card card-balance">
+                    <span class="card-label">Solde</span>
+                    <span class="card-amount" id="balance">0,00 &euro;</span>
+                </div>
+            </section>
+
+            <!-- Savings Goal -->
+            <section class="savings-section" id="savings-section">
+                <div class="savings-header">
+                    <h2>Objectif d'epargne</h2>
+                    <button class="btn-edit-goal" id="btn-edit-goal">Modifier</button>
+                </div>
+                <div class="savings-setup hidden" id="savings-setup">
+                    <div class="savings-setup-row">
+                        <div class="form-group">
+                            <label for="savings-goal-input">Objectif mensuel (&euro;)</label>
+                            <input type="number" id="savings-goal-input" min="0" step="10" placeholder="Ex: 200">
+                        </div>
+                        <button class="btn-save-goal" id="btn-save-goal">Enregistrer</button>
+                    </div>
+                </div>
+                <div class="savings-progress" id="savings-progress" style="display:none">
+                    <div class="savings-bar-container">
+                        <div class="savings-bar" id="savings-bar"></div>
+                    </div>
+                    <div class="savings-info">
+                        <span id="savings-current">0,00 &euro;</span>
+                        <span class="savings-separator">/</span>
+                        <span id="savings-target">0,00 &euro;</span>
+                    </div>
+                    <span class="savings-percentage" id="savings-pct">0%</span>
+                </div>
+            </section>
+
+            <!-- Alert Banner -->
+            <div class="alert-banner hidden" id="alert-banner">
+                <span class="alert-icon">&#9888;</span>
+                <span class="alert-text">Attention ! Votre solde est en dessous de <strong>300,00 &euro;</strong></span>
+            </div>
+
+            <!-- Toast notification -->
+            <div class="toast hidden" id="toast"></div>
+
+            <!-- Add Transaction Form -->
+            <section class="form-section">
+                <h2>Ajouter une transaction</h2>
+                <form id="transaction-form">
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="type">Type</label>
+                            <select id="type" required>
+                                <option value="income">Revenu</option>
+                                <option value="expense">Depense</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Montant</label>
+                            <input type="number" id="amount" min="0.01" step="0.01" placeholder="0,00" required>
+                        </div>
+                        <div class="form-group form-group-small">
+                            <label for="currency">Devise</label>
+                            <select id="currency">
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CHF">CHF</option>
+                                <option value="CAD">CAD</option>
+                                <option value="JPY">JPY</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">Categorie</label>
+                            <select id="category" required>
+                                <option value="">-- Choisir --</option>
+                                <optgroup label="Revenus">
+                                    <option value="Salaire">Salaire</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Investissements">Investissements</option>
+                                    <option value="Autre revenu">Autre revenu</option>
+                                </optgroup>
+                                <optgroup label="Depenses">
+                                    <option value="Alimentation">Alimentation</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Logement">Logement</option>
+                                    <option value="Loisirs">Loisirs</option>
+                                    <option value="Sante">Sante</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Factures">Factures</option>
+                                    <option value="Autre depense">Autre depense</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" placeholder="Ex: Courses au supermarche" maxlength="100">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-add">Ajouter</button>
+                        <button type="button" class="btn-undo" id="btn-undo" disabled>Annuler</button>
+                        <button type="button" class="btn-reset" id="btn-reset">Tout remettre a zero</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Recurring Transactions -->
+            <section class="recurring-section" id="recurring-section">
+                <div class="section-header-row">
+                    <h2>Transactions recurrentes</h2>
+                    <button class="btn-add-recurring" id="btn-add-recurring">+ Ajouter</button>
+                </div>
+                <div class="recurring-form hidden" id="recurring-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rec-type">Type</label>
+                            <select id="rec-type">
+                                <option value="income">Revenu</option>
+                                <option value="expense">Depense</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-amount">Montant (&euro;)</label>
+                            <input type="number" id="rec-amount" min="0.01" step="0.01" placeholder="0,00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rec-category">Categorie</label>
+                            <select id="rec-category">
+                                <optgroup label="Revenus">
+                                    <option value="Salaire">Salaire</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Investissements">Investissements</option>
+                                    <option value="Autre revenu">Autre revenu</option>
+                                </optgroup>
+                                <optgroup label="Depenses">
+                                    <option value="Alimentation">Alimentation</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Logement">Logement</option>
+                                    <option value="Loisirs">Loisirs</option>
+                                    <option value="Sante">Sante</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Factures">Factures</option>
+                                    <option value="Autre depense">Autre depense</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-day">Jour du mois</label>
+                            <input type="number" id="rec-day" min="1" max="28" value="1">
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="rec-description">Description</label>
+                        <input type="text" id="rec-description" placeholder="Ex: Loyer mensuel" maxlength="100">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-add" id="btn-save-recurring">Enregistrer</button>
+                        <button type="button" class="btn-undo" id="btn-cancel-recurring">Annuler</button>
+                    </div>
+                </div>
+                <div class="recurring-list" id="recurring-list">
+                    <p class="empty-state" id="recurring-empty">Aucune transaction recurrente</p>
+                </div>
+            </section>
+
+            <!-- Chart -->
+            <section class="chart-section">
+                <h2>Depenses par categorie</h2>
+                <div class="chart-container">
+                    <canvas id="expense-chart"></canvas>
+                    <p class="chart-empty" id="chart-empty">Aucune depense enregistree</p>
+                </div>
+            </section>
+
+            <!-- Evolution Chart -->
+            <section class="chart-section" id="evolution-section" style="display:none">
+                <h2>Evolution du solde</h2>
+                <div class="chart-container chart-container-wide">
+                    <canvas id="evolution-chart"></canvas>
+                    <p class="chart-empty" id="evolution-empty">Pas assez de donnees (min. 2 mois)</p>
+                </div>
+            </section>
+
+            <!-- Comparison Chart -->
+            <section class="chart-section" id="comparison-section" style="display:none">
+                <h2>Comparaison mensuelle</h2>
+                <div class="chart-container chart-container-wide">
+                    <canvas id="comparison-chart"></canvas>
+                    <p class="chart-empty" id="comparison-empty">Pas assez de donnees (min. 2 mois)</p>
+                </div>
+            </section>
+
+            <!-- Advice Panel -->
+            <section class="advice-section hidden" id="advice-section">
+                <h2>Conseils pour le mois prochain</h2>
+                <div id="advice-content" class="advice-content"></div>
+            </section>
+
+            <!-- Transaction List -->
+            <section class="transactions-section">
+                <div class="section-header-row">
+                    <h2>Historique des transactions</h2>
+                    <div class="export-buttons">
+                        <button class="btn-export" id="btn-export-csv" title="Exporter en CSV">&#128196; CSV</button>
+                        <button class="btn-export" id="btn-export-pdf" title="Exporter en PDF">&#128424; PDF</button>
+                    </div>
+                </div>
+                <div class="filter-bar" id="filter-bar">
+                    <input type="text" id="filter-search" class="filter-input" placeholder="Rechercher...">
+                    <select id="filter-type" class="filter-select">
+                        <option value="">Tous les types</option>
+                        <option value="income">Revenus</option>
+                        <option value="expense">Depenses</option>
+                    </select>
+                    <select id="filter-category" class="filter-select">
+                        <option value="">Toutes categories</option>
+                        <option value="Salaire">Salaire</option>
+                        <option value="Freelance">Freelance</option>
+                        <option value="Investissements">Investissements</option>
+                        <option value="Autre revenu">Autre revenu</option>
+                        <option value="Alimentation">Alimentation</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Logement">Logement</option>
+                        <option value="Loisirs">Loisirs</option>
+                        <option value="Sante">Sante</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Factures">Factures</option>
+                        <option value="Autre depense">Autre depense</option>
+                    </select>
+                    <input type="date" id="filter-date-from" class="filter-input" title="Date debut">
+                    <input type="date" id="filter-date-to" class="filter-input" title="Date fin">
+                    <button class="btn-clear-filters" id="btn-clear-filters">Effacer</button>
+                </div>
+                <div id="transaction-list" class="transaction-list">
+                    <p class="empty-state" id="empty-state">Aucune transaction pour le moment</p>
+                </div>
+            </section>
+
+            <!-- Annual Statistics -->
+            <section class="annual-section" id="annual-section" style="display:none">
+                <div class="section-header-row">
+                    <h2>Statistiques annuelles</h2>
+                    <select class="filter-select" id="annual-year-select"></select>
+                </div>
+                <div class="annual-grid" id="annual-grid"></div>
+            </section>
+
+            <!-- Archives -->
+            <section class="archives-section">
+                <div class="archives-header">
+                    <h2>Archives des mois precedents</h2>
+                    <button class="btn-toggle-archives" id="btn-toggle-archives">Voir les archives</button>
+                </div>
+                <div class="archives-body hidden" id="archives-body">
+                    <div class="archives-list" id="archives-list">
+                        <p class="empty-state" id="archives-empty">Aucune archive disponible</p>
+                    </div>
+                    <div class="archive-detail hidden" id="archive-detail">
+                        <button class="btn-back-archives" id="btn-back-archives">&#8592; Retour aux archives</button>
+                        <div id="archive-detail-content"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>BudgetFlow &copy; 2026 &middot; <button class="btn-shortcuts-hint" id="btn-shortcuts-hint">Raccourcis (Alt+H)</button></p>
+        </footer>
+    </div>
+
+    <!-- Shortcuts Overlay -->
+    <div class="shortcuts-overlay hidden" id="shortcuts-overlay">
+        <div class="shortcuts-card">
+            <h2>Raccourcis clavier</h2>
+            <div class="shortcuts-list" id="shortcuts-list"></div>
+            <button class="btn-close-shortcuts" id="btn-close-shortcuts">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Currency Settings Overlay -->
+    <div class="currency-overlay hidden" id="currency-overlay">
+        <div class="currency-card">
+            <h2>Taux de change</h2>
+            <p class="text-muted-small">Base : 1 EUR = X devise</p>
+            <div class="currency-rates" id="currency-rates"></div>
+            <div class="currency-actions">
+                <button class="btn-add" id="btn-save-rates">Enregistrer</button>
+                <button class="btn-undo" id="btn-close-currency">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
