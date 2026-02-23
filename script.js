@@ -234,6 +234,16 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 document.getElementById('btn-theme').addEventListener('click', toggleTheme);
 document.getElementById('btn-theme-auth').addEventListener('click', toggleTheme);
 
+// Password toggle (eye icon)
+document.querySelectorAll('.btn-toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? '\u{1F648}' : '\u{1F441}';
+    });
+});
+
 // ===== App DOM =====
 const form = document.getElementById('transaction-form');
 const typeSelect = document.getElementById('type');

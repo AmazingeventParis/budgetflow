@@ -151,6 +151,36 @@ body {
     gap: 0.3rem;
 }
 
+.password-wrapper {
+    position: relative;
+    display: flex;
+}
+
+.password-wrapper input {
+    flex: 1;
+    padding-right: 2.5rem;
+}
+
+.btn-toggle-password {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.3rem;
+    border-radius: 4px;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.btn-toggle-password:hover {
+    color: var(--accent);
+}
+
 .auth-error {
     color: var(--expense);
     font-size: 0.85rem;
